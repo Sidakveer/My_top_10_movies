@@ -6,6 +6,10 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 import requests
 
+# Api section
+API_KEY = "ad78a5e9681681f51de820ce463a70b6"
+API_LINK = "https://api.themoviedb.org/3/search/movie"
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '8BYkEfBA6O6donzWlSihBXox7C0sKR6b'
 Bootstrap(app)
@@ -38,10 +42,17 @@ class Movie(db.Model):
 # )
 # db.session.add(new_movie)
 # db.session.commit()
+
+# Form section
 class RateMovieForm(FlaskForm):
     rating = StringField("Your Rating Out of 10!")
     review = StringField("Your Review")
     submit = SubmitField("Done")
+
+
+class FindMovieForm(FlaskForm):
+    title = StringField("Movie Title", validators=[DataRequired()])
+    submit = SubmitField("Add Movie")
 
 
 @app.route("/")
@@ -72,15 +83,15 @@ def delete():
     return redirect(url_for("home"))
 
 
-@app.route("/add")
+@app.route("/add", methods=["GET", "POST"])
 def add():
     form = FindMovieForm()
+    if form.validate_on_submit():
+        movie_title = form.title.data
+        response = requests.get(API_LINK, params={"api_key": API_KEY, "query": movie_title})
+        result = response.json()["results"]
+        return render_template("select.html", data=result)
     return render_template("add.html", form=form)
-
-class FindMovieForm(FlaskForm):
-    title = StringField("Movie Title", validators=[DataRequired()])
-    submit = SubmitField("Add Movie")
-
 
 
 if __name__ == '__main__':
