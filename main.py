@@ -22,10 +22,10 @@ class Movie(db.Model):
     title = db.Column(db.String(120), unique=True, nullable=False)
     year = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(120), nullable=False)
-    rating = db.Column(db.Float, nullable=False)
-    ranking = db.Column(db.Integer, nullable=False)
-    review = db.Column(db.String(120), nullable=False)
-    img_url = db.Column(db.String(120), unique=True, nullable=False)
+    rating = db.Column(db.Float, nullable=True)
+    ranking = db.Column(db.Integer, nullable=True)
+    review = db.Column(db.String(120), nullable=True)
+    img_url = db.Column(db.String(120), nullable=False)
 
     def __repr__(self):
         return f'<Movie {self.title}>'
@@ -93,6 +93,7 @@ def add():
         return render_template("select.html", data=result)
     return render_template("add.html", form=form)
 
+
 @app.route("/find")
 def find():
     movie_id = request.args.get("id")
@@ -105,13 +106,13 @@ def find():
             year=result["release_date"].split("-")[0],
             description=result["overview"],
             img_url=f"https://image.tmdb.org/t/p/w500{result['poster_path']}",
-            # rating=10,
-            # ranking=10,
-            # review="None"
+            rating=10,
+            ranking=10,
+            review="None"
         )
         db.session.add(movie)
         db.session.commit()
-        return redirect(url_for('edit', id=movie.id))
+        return redirect(url_for('rate_movie', id=movie.id))
 
 
 if __name__ == '__main__':
