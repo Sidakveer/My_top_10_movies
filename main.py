@@ -93,6 +93,26 @@ def add():
         return render_template("select.html", data=result)
     return render_template("add.html", form=form)
 
+@app.route("/find")
+def find():
+    movie_id = request.args.get("id")
+    if movie_id:
+        movie_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
+        response = requests.get(movie_url, params={"api_key":API_KEY, "language":"en-US"})
+        result = response.json()
+        movie = Movie(
+            title=result["original_title"],
+            year=result["release_date"].split("-")[0],
+            description=result["overview"],
+            img_url=f"https://image.tmdb.org/t/p/w500{result['poster_path']}",
+            # rating=10,
+            # ranking=10,
+            # review="None"
+        )
+        db.session.add(movie)
+        db.session.commit()
+        return redirect(url_for('edit', id=movie.id))
+
 
 if __name__ == '__main__':
     app.run(debug=True)
